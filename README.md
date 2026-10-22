@@ -1,0 +1,30 @@
+# Quản trị hệ thống - Đề 3 (DTC245200613)
+
+Hệ thống WordPress chạy bằng Docker Compose, gồm Nginx (HTTPS), WordPress, MySQL và phpMyAdmin.
+
+## Thông tin
+- MSSV: DTC245200613
+- Ubuntu: 26.04.1 LTS (ghi chú: đề yêu cầu 24.04, cần xác nhận với thầy)
+- Tên miền: wp.dtc245200613.lab và pma.dtc245200613.lab
+
+## Cấu trúc
+- docker-compose.yml: khai báo 4 dịch vụ db, wordpress, phpmyadmin, nginx
+- nginx/conf.d/lab.conf: chuyển HTTP sang HTTPS, proxy tới WordPress và phpMyAdmin
+- .env.example: mẫu biến môi trường (không chứa mật khẩu thật)
+- .env: chứa mật khẩu thật, KHÔNG commit
+
+## Cách chạy
+1. cp .env.example .env, sau đó điền mật khẩu thật vào .env
+2. Tạo chứng chỉ tự ký trong nginx/certs/ (lab.crt, lab.key)
+3. Thêm hai dòng vào file hosts của Windows, trỏ tới IP của VM
+4. docker compose up -d
+
+## Mạng
+- frontend: nginx
+- backend (internal): db, wordpress, phpmyadmin, không publish cổng ra ngoài
+- Chỉ nginx publish cổng 80 và 443
+
+## Trạng thái
+- Mốc 1: Nginx + WordPress + phpMyAdmin + MySQL (hoàn thành)
+- Mốc 2: Prometheus + Grafana (chưa làm)
+- Mốc 3: Loki + LogQL + hardening (chưa làm)
