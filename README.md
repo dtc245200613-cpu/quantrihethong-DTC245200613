@@ -27,7 +27,7 @@ Hệ thống WordPress chạy bằng Docker Compose, gồm Nginx (HTTPS), WordPr
 ## Trạng thái
 - Mốc 1: Nginx + WordPress + phpMyAdmin + MySQL (hoàn thành)
 - Mốc 2: Prometheus + Grafana + exporter (hoàn thành)
-- Mốc 3: Loki + LogQL + hardening (chưa làm)
+- Mốc 3: Loki + Promtail + LogQL + hardening (hoàn thành)
 
 ## Giám sát (Mốc 2)
 - Các file: docker-compose.monitor.yml, monitoring/prometheus.yml, monitoring/grafana/provisioning
@@ -40,3 +40,24 @@ Hệ thống WordPress chạy bằng Docker Compose, gồm Nginx (HTTPS), WordPr
 - Dashboard cAdvisor không có số liệu theo container. Nguyên nhân: Docker dùng storage driver overlayfs trên máy ảo, khiến cAdvisor không lấy được tên container. Kiểm tra: docker exec cadvisor wget -qO- http://127.0.0.1:8080/metrics | grep -c 'name="' trả về 0.
 - Cách khắc phục là đổi sang overlay2 và tái tạo dữ liệu Docker. Chưa thực hiện để giữ dữ liệu WordPress.
 - Node Exporter và MySQL Overview hoạt động bình thường.
+
+## Log tập trung và LogQL (Mốc 3)
+- Loki lưu log. Promtail đọc log qua Docker socket, gắn nhãn container và muc (mức độ lỗi).
+- Truy vấn mẫu:
+  - {container="wp-dtc245200613-wordpress-1"}
+  - {container="wp-dtc245200613-nginx-1"} |= "GET"
+  - {container=~"wp-dtc245200613-.*"} |= "error"
+  - sum by (container) (count_over_time({container=~"wp-dtc245200613-.*", muc=~"error|warn|fatal|critical"}[5m]))
+
+## Hardening (Mốc 3)
+- Nginx: server_tokens off, X-Frame-Options, X-Content-Type-Options, Referrer-Policy (nginx/conf.d/security.conf).
+- Container giám sát: security_opt no-new-privileges.
+- Mật khẩu ngẫu nhiên cho MySQL, exporter và Grafana, lưu trong .env (không commit).
+- Grafana và Prometheus chỉ publish trên 127.0.0.1.
+- Tài khoản exporter MySQL chỉ có quyền PROCESS, REPLICATION CLIENT, SELECT.
+
+## Hạn chế đã biết
+- Promtail đọc Docker socket (quyền cao, chỉ đọc). Cần thay bằng cách khác trong môi trường thật.
+- monitoring/my.cnf có quyền 644 để exporter đọc được (chứa mật khẩu exporter). Cần chuyển sang secret riêng.
+- cAdvisor không có số liệu theo container do overlayfs (xem Mốc 2).
+- Ubuntu 26.04.1 LTS thay vì 24.04 như đề yêu cầu.

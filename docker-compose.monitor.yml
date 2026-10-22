@@ -9,6 +9,7 @@ services:
       - "127.0.0.1:9090:9090"
     networks: [monitor]
     restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
 
   grafana:
     image: grafana/grafana:11.2.0
@@ -22,6 +23,7 @@ services:
       - "127.0.0.1:3000:3000"
     networks: [monitor]
     restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
 
   node-exporter:
     image: prom/node-exporter:v1.8.2
@@ -30,6 +32,7 @@ services:
       - /:/host:ro
     networks: [monitor]
     restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
@@ -40,6 +43,7 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     networks: [monitor]
     restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
 
   mysqld-exporter:
     image: prom/mysqld-exporter:v0.15.1
@@ -48,10 +52,32 @@ services:
       - ./monitoring/my.cnf:/etc/mysql/my.cnf:ro
     networks: [backend, monitor]
     restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+
+  loki:
+    image: grafana/loki:3.2.0
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    networks: [monitor]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+
+  promtail:
+    image: grafana/promtail:3.2.0
+    command: ["-config.file=/etc/promtail/promtail-config.yml"]
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [monitor]
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
 
 volumes:
   prom_data:
   grafana_data:
+  loki_data:
 
 networks:
   monitor: {}
