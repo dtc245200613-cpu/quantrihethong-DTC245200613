@@ -1,3 +1,4 @@
 .env
 nginx/certs/
 *.log
+monitoring/my.cnf

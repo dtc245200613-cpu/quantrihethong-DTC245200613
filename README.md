@@ -26,5 +26,12 @@ Hệ thống WordPress chạy bằng Docker Compose, gồm Nginx (HTTPS), WordPr
 
 ## Trạng thái
 - Mốc 1: Nginx + WordPress + phpMyAdmin + MySQL (hoàn thành)
-- Mốc 2: Prometheus + Grafana (chưa làm)
+- Mốc 2: Prometheus + Grafana + exporter (hoàn thành)
 - Mốc 3: Loki + LogQL + hardening (chưa làm)
+
+## Giám sát (Mốc 2)
+- Các file: docker-compose.monitor.yml, monitoring/prometheus.yml, monitoring/grafana/provisioning
+- Thành phần: Prometheus, Grafana, node-exporter (máy ảo), cAdvisor (container), mysqld-exporter (MySQL)
+- Grafana và Prometheus chỉ mở trên 127.0.0.1 (truy cập bằng localhost trong VM)
+- Dashboard nhập sẵn: Node Exporter Full (1860), cAdvisor (14282), MySQL Overview (7362)
+- Tài khoản exporter MySQL chỉ có quyền đọc số liệu. File monitoring/my.cnf được tạo từ .env và không được commit.
