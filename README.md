@@ -35,3 +35,8 @@ Hệ thống WordPress chạy bằng Docker Compose, gồm Nginx (HTTPS), WordPr
 - Grafana và Prometheus chỉ mở trên 127.0.0.1 (truy cập bằng localhost trong VM)
 - Dashboard nhập sẵn: Node Exporter Full (1860), cAdvisor (14282), MySQL Overview (7362)
 - Tài khoản exporter MySQL chỉ có quyền đọc số liệu. File monitoring/my.cnf được tạo từ .env và không được commit.
+
+## Hạn chế đã biết (Mốc 2)
+- Dashboard cAdvisor không có số liệu theo container. Nguyên nhân: Docker dùng storage driver overlayfs trên máy ảo, khiến cAdvisor không lấy được tên container. Kiểm tra: docker exec cadvisor wget -qO- http://127.0.0.1:8080/metrics | grep -c 'name="' trả về 0.
+- Cách khắc phục là đổi sang overlay2 và tái tạo dữ liệu Docker. Chưa thực hiện để giữ dữ liệu WordPress.
+- Node Exporter và MySQL Overview hoạt động bình thường.
